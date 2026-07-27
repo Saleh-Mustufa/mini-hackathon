@@ -1,0 +1,33 @@
+{
+  "model": "claude-sonnet-4-6",
+  "context_files": ["agent.md"],
+  "mcp_servers": {
+    "context7": {
+      "type": "npx",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"]
+    }
+  },
+  "agents": {
+    "spec-agent": {
+      "description": "Writes and enforces SPEC.md. Ensures spec-first discipline. Validates that implementation matches spec before any file is written.",
+      "system_prompt_file": ".opencode/agents/spec-agent.md"
+    },
+    "walker-ranker-agent": {
+      "description": "Implements recursive file discovery, noise detection, and multi-signal relevance scoring against the task description.",
+      "system_prompt_file": ".opencode/agents/walker-ranker-agent.md"
+    },
+    "bundler-agent": {
+      "description": "Owns token counting, budget management, truncation policy, and bundle assembly into final markdown format.",
+      "system_prompt_file": ".opencode/agents/bundler-agent.md"
+    },
+    "manifest-cli-agent": {
+      "description": "Implements the exact CLI contract (argparse), all exit codes, error messages, and the manifest JSON schema.",
+      "system_prompt_file": ".opencode/agents/manifest-cli-agent.md"
+    },
+    "qa-edge-agent": {
+      "description": "Owns all edge cases: binary files, non-UTF-8, empty dirs, single file larger than budget, repeat-run byte-identical determinism, 3000-file performance.",
+      "system_prompt_file": ".opencode/agents/qa-edge-agent.md"
+    }
+  }
+}

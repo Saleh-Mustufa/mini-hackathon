@@ -25,6 +25,7 @@
 - [Bundle Format](#bundle-format)
 - [Determinism](#determinism)
 - [Noise Filtering](#noise-filtering)
+- [AI Agent Skill](#ai-agent-skill)
 - [Tips & Best Practices](#tips--best-practices)
 - [Project Structure](#project-structure)
 
@@ -443,17 +444,34 @@ Files excluded automatically before scoring:
 
 ```
 ctxpack/
-├── ctxpack.py          # CLI entry point — argparse, orchestration
-├── walker.py           # File discovery + noise filtering
-├── ranker.py           # Relevance scoring (keywords + priority + depth)
-├── bundler.py          # Token budget management + greedy selection
-├── formatter.py        # Bundle markdown formatting + directory tree
-├── manifest.py         # JSON manifest output
-├── test_edge_cases.py  # 16 edge case tests
-├── SPEC.md             # Full specification document
-├── agent.md            # AI context file
-├── PROMPTS.md          # Development prompt journal
-├── JOURNAL.md          # Design reflection
-├── WHAT_IS_CTXPACK.md  # 5W&H explanation
-└── USAGE_GUIDE.md      # Beginner's tutorial
+├── ctxpack.py          # Thin CLI entry point (delegates to src/ctxpack.py)
+├── src/                # Python implementation (stdlib only)
+│   ├── ctxpack.py      #   CLI orchestration
+│   ├── walker.py       #   File discovery + noise filtering
+│   ├── ranker.py       #   Relevance scoring
+│   ├── bundler.py      #   Token budget + greedy selection
+│   ├── formatter.py    #   Bundle markdown + directory tree
+│   └── manifest.py     #   JSON manifest output
+├── tests/              # Test suite
+│   └── test_edge_cases.py  # 16 edge case tests
+├── docs/               # Documentation
+│   ├── SPEC.md         #   Full specification document
+│   ├── agent.md        #   AI context file
+│   ├── PROMPTS.md      #   Development prompt journal
+│   ├── JOURNAL.md      #   Design reflection
+│   ├── WHAT_IS_CTXPACK.md  # 5W&H explanation
+│   ├── USAGE_GUIDE.md   #   Beginner's tutorial
+│   └── skill-ctxpack.md   #   Skill file for other AI agents
+├── .opencode/          # OpenCode agent configuration
+└── README.md           # This file
 ```
+
+## AI Agent Skill
+
+For other AI coding agents (Claude Code, OpenCode, Codex, etc.), a ready-to-use skill file is available at `docs/skill-ctxpack.md`. It teaches any agent how to use ctxpack autonomously:
+
+```markdown
+<!-- Tell your agent: "Read docs/skill-ctxpack.md for context packing instructions" -->
+```
+
+The skill covers: command syntax, bundle format parsing, scoring logic explained, noise rules, token counting, and common agent workflow templates.

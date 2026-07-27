@@ -10,7 +10,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-CTXPACK_PATH = str(Path(__file__).resolve().parent / "ctxpack.py")
+CTXPACK_PATH = str(Path(__file__).resolve().parent.parent / "ctxpack.py")
 
 
 def _run_ctxpack(args: list[str], cwd: str | None = None, env: dict | None = None) -> subprocess.CompletedProcess:

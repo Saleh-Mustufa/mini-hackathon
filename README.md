@@ -12,6 +12,7 @@
 ## Table of Contents
 
 - [What is ctxpack?](#what-is-ctxpack)
+- [Agentic AI Integration](#-agentic-ai-integration)
 - [Quick Start](#quick-start)
 - [Requirements](#requirements)
 - [Installation](#installation)
@@ -40,6 +41,70 @@ ctxpack scans a codebase folder, scores every file for relevance to your task, a
 - Code review preparation — give the reviewer/AI only what matters
 - Onboarding — pack the architectural core of an unfamiliar project
 - Bug fixing — ctxpack automatically finds files related to the bug area
+
+---
+
+## 🤖 Agentic AI Integration
+
+ctxpack is purpose-built to fuel **agentic AI coding tools** — Claude Code, OpenCode, Codex CLI, Copilot CLI, Cursor, Windsurf, and others.
+
+### Why agentic tools need ctxpack
+
+Agentic AI tools consume context tokens for everything: reading files, searching directories, understanding structure. Every token spent on **discovery** is a token not spent on **reasoning** or **code generation**.
+
+ctxpack solves this by doing the discovery *before* the agent starts. It pre-packs the most relevant files into a single markdown document so the agent's entire budget goes toward solving your problem — not browsing your codebase.
+
+```
+Without ctxpack:    [Agent reads 50 files one by one → budget exhausted → shallow analysis]
+With ctxpack:       [ctxpack scores 500 files → packs top 12 → Agent gets 12 perfect files + structure]
+```
+
+### Workflow: ctxpack → Agent
+
+```bash
+# Step 1: Pack relevant context
+ctxpack --path . --task "add rate limiting middleware" --budget 8000 --out context.md
+
+# Step 2: Feed to your agent (tool-specific methods below)
+```
+
+### How to use ctxpack with each tool
+
+| Tool | How to feed the bundle |
+|------|----------------------|
+| **Claude Code** | `claude --context context.md -p "add rate limiting based on this context"` |
+| **OpenCode** | `opencode --context context.md` or paste bundle into the chat |
+| **Codex CLI** | `codex --context context.md -p "implement the changes"` |
+| **Copilot CLI** | Paste the bundle before your question: `gh copilot suggest "Based on this codebase, explain..."` |
+| **Cursor** | Open `context.md` in a tab and reference `@context.md` in your prompt |
+| **Windsurf** | Create a `context.md` file in `.windsurf/` for persistent context |
+| **Any chat UI** | Copy the entire bundle and paste as the first message |
+
+### Why the bundle format is agent-friendly
+
+| Feature | Why it matters for agents |
+|---------|-------------------------|
+| **`## File:` headers** | Agent can parse and reference specific files |
+| **Code fences** | Language-aware syntax — agent knows file type immediately |
+| **`<!-- tokens: N -->`** | Agent can estimate remaining context budget |
+| **Directory tree** | Agent understands project structure without `ls` |
+| **Deterministic output** | Same context every time — cacheable, reproducible |
+| **Sorted by relevance** | Most important files appear first — agent sees them first |
+
+### Best practice: pre-context then iterate
+
+```bash
+# 1. Generate focused context
+ctxpack --path ./src/api --task "add user authentication endpoints" --budget 4000 --out auth_context.md
+
+# 2. Launch agent with context
+claude --context auth_context.md -p "Implement the auth endpoints described. Read any additional files you need."
+
+# 3. The agent will read more files if needed, but it starts with the essentials
+#    already in its context — saving 60-80% of discovery tokens.
+```
+
+**Pro tip:** Run ctxpack from within the agent itself. Tell your agentic tool: *"Before you start, run ctxpack --path . --task '<what we are doing>' --budget 8000 --out ctx.md, then use ctx.md as your primary reference."* The bundle becomes a shared ground truth that keeps the agent focused.
 
 ---
 

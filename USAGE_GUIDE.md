@@ -245,6 +245,56 @@ python -c "import json; d=json.load(open('review_manifest.json')); [print(i['pat
 
 ---
 
+### Walkthrough D: Supercharge Your AI Agent (Claude Code, OpenCode, Codex)
+
+**Scenario:** You have an agentic AI tool and want it to work on your codebase without wasting tokens on file discovery.
+
+**Step 1:** Generate the context bundle
+
+```bash
+ctxpack --path . --task "add a health check endpoint to the API server" --budget 8000 --out ctx.md
+```
+
+**Step 2:** Launch your agent with the bundle as context
+
+```bash
+# Claude Code
+claude --context ctx.md -p "Implement the health check endpoint"
+
+# OpenCode
+opencode --context ctx.md
+
+# Codex CLI
+codex --context ctx.md -p "Add a /health endpoint"
+
+# Or simply pipe the bundle
+ctxpack --path . --task "fix the login bug" --budget 6000 | head -100
+```
+
+**Step 3 (advanced):** Make the agent use ctxpack itself
+
+Add this instruction to your agent's system prompt or CLAUDE.md / agent.md:
+
+> *"Before reading any files, run ctxpack --path . --task '<current task>' --budget 8000 --out ctx.md. Use ctx.md as your primary reference. Only read additional files if ctx.md lacks critical details."*
+
+This turns ctxpack into the agent's **context management layer** — it decides what's relevant so the agent doesn't have to.
+
+**Why this works:** Without ctxpack, an agent might read 30-50 files before understanding your codebase. With ctxpack, it gets the 8-12 most relevant files plus a directory tree in one shot. At ~4000 tokens for the bundle vs ~8000 tokens for exploratory reads, you save 50%+ of your context budget.
+
+### Template: Agent Workflow
+
+```bash
+# 1. Pack
+ctxpack --path [project] --task "[task description]" --budget 8000 --out ctx.md
+
+# 2. Act
+claude --context ctx.md -p "[your instruction]"
+
+# Or opencode, codex, etc.
+```
+
+---
+
 ## 7. Common Mistakes & Fixes
 
 ### Mistake 1: "python is not recognized"
@@ -350,4 +400,24 @@ python ctxpack.py --path [folder] --task "complete codebase understanding" --bud
 ### Deterministic output (same hash every run)
 ```bash
 SOURCE_DATE_EPOCH=1700000000 python ctxpack.py --path [folder] --task "test" --budget 5000 | md5sum
+```
+
+### Pre-context for Claude Code
+```bash
+ctxpack --path [folder] --task "[task]" --budget 8000 --out ctx.md; claude --context ctx.md -p "[instruction]"
+```
+
+### Pre-context for OpenCode
+```bash
+ctxpack --path [folder] --task "[task]" --budget 6000 --out ctx.md; opencode --context ctx.md
+```
+
+### Pre-context for Codex CLI
+```bash
+ctxpack --path [folder] --task "[task]" --budget 8000 --out ctx.md; codex --context ctx.md -p "[instruction]"
+```
+
+### Agent system prompt template
+```
+Before reading any files, run ctxpack --path . --task "<current task>" --budget 8000 --out ctx.md. Use ctx.md as your primary reference. Only read additional files if ctx.md lacks critical details.
 ```

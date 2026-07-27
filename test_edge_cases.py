@@ -13,12 +13,16 @@ from pathlib import Path
 CTXPACK_PATH = str(Path(__file__).resolve().parent / "ctxpack.py")
 
 
-def _run_ctxpack(args: list[str], cwd: str | None = None) -> subprocess.CompletedProcess:
+def _run_ctxpack(args: list[str], cwd: str | None = None, env: dict | None = None) -> subprocess.CompletedProcess:
+    cmd_env = os.environ.copy()
+    if env:
+        cmd_env.update(env)
     return subprocess.run(
         [sys.executable, CTXPACK_PATH] + args,
         capture_output=True,
         text=True,
         cwd=cwd,
+        env=cmd_env,
     )
 
 
@@ -99,8 +103,8 @@ class TestEdgeCases(unittest.TestCase):
         for fname in ["a.py", "b.py", "c.py"]:
             with open(os.path.join(test_dir, fname), "w") as f:
                 f.write(f"# {fname}\nprint('hello')\n")
-        run1 = _run_ctxpack(["--path", test_dir, "--task", "determinism", "--budget", "5000"])
-        run2 = _run_ctxpack(["--path", test_dir, "--task", "determinism", "--budget", "5000"])
+        run1 = _run_ctxpack(["--path", test_dir, "--task", "determinism", "--budget", "5000"], env={"SOURCE_DATE_EPOCH": "1700000000"})
+        run2 = _run_ctxpack(["--path", test_dir, "--task", "determinism", "--budget", "5000"], env={"SOURCE_DATE_EPOCH": "1700000000"})
         self.assertEqual(run1.returncode, 0)
         self.assertEqual(run2.returncode, 0)
         hash1 = hashlib.sha256(run1.stdout.encode()).hexdigest()
